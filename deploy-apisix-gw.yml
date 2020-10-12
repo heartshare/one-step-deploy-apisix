@@ -1,0 +1,80 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: apisix
+    qcloud-app: apisix
+  name: apisix
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: apisix
+      qcloud-app: apisix
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: apisix
+        qcloud-app: apisix
+    spec:
+      containers:
+      - image: apache/apisix:dev
+        imagePullPolicy: IfNotPresent
+        name: apisix
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false
+        volumeMounts:
+        - mountPath: /usr/local/apisix/conf/config.yaml
+          name: apisix-config
+          readOnly: true
+          subPath: config.yaml
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: config.yaml
+            mode: 420
+            path: config.yaml
+          name: apisix-config
+        name: apisix-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix
+  labels:
+    app: apisix-gw   # useful for service discovery, for example, prometheus-operator.  
+spec:
+  ports:
+  - name: http
+    port: 9080
+    protocol: TCP
+    targetPort: 9080
+  - name: 9443-9443-tcp
+    port: 9443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    k8s-app: apisix
+    qcloud-app: apisix
+  sessionAffinity: None
+  type: ClusterIP
+  

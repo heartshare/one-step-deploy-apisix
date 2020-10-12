@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  finalizers:
+  - kubernetes.io/pvc-protection
+  name: mysql-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: mysql
+    qcloud-app: mysql
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      k8s-app: mysql
+      qcloud-app: mysql
+  template:
+    metadata:
+      labels:
+        k8s-app: mysql
+        qcloud-app: mysql
+    spec:
+      containers:
+      - args:
+        - --ignore-db-dir=lost+found
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root@123
+        image: mysql:5.7
+        imagePullPolicy: IfNotPresent
+        name: mysql
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysql-data
+        - mountPath: /docker-entrypoint-initdb.d/mysql-custom-init.sql
+          name: mysql-custom-init
+          subPath: mysql-custom-init.sql
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-data
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: mysql-custom-init.sql
+            mode: 420
+            path: mysql-custom-init.sql
+          name: mysql-custom-init
+        name: mysql-custom-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-apisix
+  # namespace: default
+spec:
+  clusterIP: 172.16.252.39
+  ports:
+  - name: 3306-3306-tcp
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    k8s-app: mysql
+    qcloud-app: mysql
+  type: ClusterIP
+
+
+
+
+        
