@@ -50,7 +50,7 @@ spec:
       - configMap:
           defaultMode: 420
           items:
-          - key: config.yaml
+          - key: apisix-config.yml
             mode: 420
             path: config.yaml
           name: apisix-config

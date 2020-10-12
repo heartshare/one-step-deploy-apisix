@@ -25,15 +25,15 @@ spec:
         - name: MYSQL_SERVER_ADDRESS
           value: mysql-apisix:3306
         - name: MYSQL_USER
-          value: apisix
+          value: root
         - name: MYSQL_PASSWORD
           value: root@123
         - name: APISIX_BASE_URL
-          value: http://apisix:80/apisix/admin
+          value: http://apisix:9080/apisix/admin
         - name: APISIX_API_KEY
           value: edd1c9f034335f136f87ad84b625c8f1
         - name: APISIX_DEBUG_URL
-          value: http://apisix:80
+          value: http://apisix:9080
         image: yanfengking/apisix-manager-api:latest
         imagePullPolicy: IfNotPresent
         name: manager

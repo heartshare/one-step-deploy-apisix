@@ -64,7 +64,6 @@ metadata:
   name: mysql-apisix
   # namespace: default
 spec:
-  clusterIP: 172.16.252.39
   ports:
   - name: 3306-3306-tcp
     port: 3306
