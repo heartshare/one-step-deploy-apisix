@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ns=$1
 
 if [ "$ns" = "" ]
@@ -11,9 +10,8 @@ fi
 echo "create namespace"
 kubectl create namespace ${ns}
 
-echo "deploy-etcd and sleep 60s"
+echo "deploy-etcd "
 kubectl apply -f  deploy-etcd-cluster.yml  -n ${ns}
-sleep 60
 
 echo "deploy-apisix-gw"
 sed -i -e "s%{YOUR_NAMESPACE}%${ns}%g" apisix-config.yml
@@ -32,3 +30,6 @@ kubectl apply -f deploy-apisix-manager.yml  -n ${ns}
 
 echo "deploy-apisix-dashboard"
 kubectl apply -f deploy-apisix-dashboard.yml -n ${ns}
+
+echo "deploy over ,please Wait for success"
+watch "kubectl get deploy,statefulset -n apisix-gw"
